@@ -59,7 +59,7 @@ export default class App extends React.Component {
 
 | Prop | Type | Default | Description |
 | ---- | ---- | ----| ---- |
-| containerHeight | number | -- | The height of the drawer. | 
+| containerHeight | number | -- | The height of the drawer. |
 | offset | number | 0 | If your app uses tab navigation or a header, **offset** equals their combined heights. In the demo gif, the offset is the header + tab heights so that the drawer renders correctly within the map view. |
 | downDisplay | number | containerHeight / 1.5 | When the drawer is swiped into down position, **downDisplay** controls how far it settles below its up position. For example, if its value is 20, the drawer will settle 20 points below the up position. The default value shows 1/3 of the container (if containerHeight = 60, the default downDisplay value = 40). |
 | backgroundColor | string | '#ffffff' | The background color of the drawer. |
@@ -69,9 +69,13 @@ export default class App extends React.Component {
 | onExpanded | func | -- | A callback function triggered when the drawer is swiped into up position |
 | onCollapsed | func | -- | A callback function triggered when the drawer is swiped into down position |
 
-| Method  | Description |
-| ---- | ---- | ----| ---- |
-| toggleDrawerState() | Open/Close drawer based on previous state   |
+| Method | Description |
+| ---- | ---- |
+| toggleDrawerState() | Open/Close drawer based on previous state |
+| openBottomDrawer() | Open drawer manually |
+| closeBottomDrawer() | Close drawer manually |
+| setDrawerState(state) | Force set the drawer state (`state` can be by BottomDrawer.DOWN_STATE or BottomDrawer.UP_STATE) |
+
 ### Questions?
-Feel free to contact me at [jackdillklein@gmail.com](mailto:jackdillklein@gmail.com) or [create an issue](https://github.com/jacklein/rn-bottom-drawer/issues/new)   
-Feel free to contact me at [zadehdolatabad@gmail.com](mailto:zadehdolatabad@gmail.com) 
+Feel free to contact me at [jackdillklein@gmail.com](mailto:jackdillklein@gmail.com) or [create an issue](https://github.com/jacklein/rn-bottom-drawer/issues/new)
+Feel free to contact me at [zadehdolatabad@gmail.com](mailto:zadehdolatabad@gmail.com)
