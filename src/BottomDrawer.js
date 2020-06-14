@@ -4,7 +4,6 @@ import { View, Dimensions, Animated } from 'react-native';
 
 import Animator from './Animator';
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 export const DOWN_STATE = 0;
 export const UP_STATE = 1;
 
@@ -89,10 +88,12 @@ export default class BottomDrawer extends Component {
          * UP_POSITION and DOWN_POSITION calculate the two (x,y) values for when
          * the drawer is swiped into up position and down position.
          */
-        this.UP_POSITION = this._calculateUpPosition(SCREEN_HEIGHT, this.props.containerHeight, this.props.offset);
+        this.UP_POSITION = this._calculateUpPosition(Dimensions.get('window').height, this.props.containerHeight, this.props.offset);
         this.DOWN_POSITION = this._calculateDownPosition(this.UP_POSITION, this.DOWN_DISPLAY);
 
         this.state = {
+            height: Dimensions.get('window').height,
+            width: Dimensions.get('window').width,
             currentPosition: this.props.startUp ? this.UP_POSITION : this.DOWN_POSITION,
             currentState: this.props.startUp ? UP_STATE : DOWN_STATE,
             downPosition: this.DOWN_POSITION,
@@ -100,13 +101,23 @@ export default class BottomDrawer extends Component {
         };
     }
 
+    componentDidMount() {
+        // Event Listener for orientation changes
+        Dimensions.addEventListener('change', () => {
+            this.setState({
+                width: Dimensions.get('window').width,
+                height: Dimensions.get('window').height
+            });
+        });
+    }
+
     UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.offset !== this.props.offset) {
             const newDisplay = nextProps.downDisplay || nextProps.containerHeight / 1.5;
 
-            const newUp = this._calculateUpPosition(SCREEN_HEIGHT, nextProps.containerHeight, nextProps.offset);
+            const newUp = this._calculateUpPosition(this.state.height, nextProps.containerHeight, nextProps.offset);
             const newDown = this._calculateDownPosition(this.UP_POSITION, newDisplay);
-            this.setState({ upPosition: newUp, downPosition: newDown });
+            this.setState({ upPosition: newUp, downPosition: newDown, width: Dimensions.get('window').width, height: Dimensions.get('window').height });
         }
     }
 
@@ -152,7 +163,7 @@ export default class BottomDrawer extends Component {
                 onDrawerStateSet={(state) => this.setDrawerState(state)}>
                 {this.props.children}
 
-                <View style={{ height: Math.sqrt(SCREEN_HEIGHT), backgroundColor: this.props.backgroundColor }} />
+                <View style={{ height: Math.sqrt(this.state.height), backgroundColor: this.props.backgroundColor }} />
             </Animator>
         );
     }

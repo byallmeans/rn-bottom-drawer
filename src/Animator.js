@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import { PanResponder, Animated, Dimensions, StyleSheet } from 'react-native';
 import { DOWN_STATE, UP_STATE } from './BottomDrawer';
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 export default class Animator extends Component {
+    state = {
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height
+    };
+
     constructor(props) {
         super(props);
 
@@ -15,6 +17,16 @@ export default class Animator extends Component {
             onStartShouldSetPanResponder: () => true,
             onPanResponderMove: this._handlePanResponderMove,
             onPanResponderRelease: this._handlePanResponderRelease
+        });
+    }
+
+    componentDidMount() {
+        // Event Listener for orientation changes
+        Dimensions.addEventListener('change', () => {
+            this.setState({
+                width: Dimensions.get('window').width,
+                height: Dimensions.get('window').height
+            });
         });
     }
 
@@ -39,7 +51,7 @@ export default class Animator extends Component {
                 style={[
                     { ...this.position.getLayout(), left: 0 },
                     StyleSheet.flatten([
-                        styles.animationContainer(this.props.containerHeight, this.props.backgroundColor),
+                        styles.animationContainer(this.props.containerHeight, this.props.backgroundColor, this.state.height, this.state.width),
                         styles.roundedEdges(this.props.roundedEdges),
                         styles.shadow(this.props.shadow)
                     ])
@@ -76,7 +88,7 @@ export default class Animator extends Component {
     }
 
     _calculateEase(gesture) {
-        return Math.min(Math.sqrt(gesture.dy * -1), Math.sqrt(SCREEN_HEIGHT));
+        return Math.min(Math.sqrt(gesture.dy * -1), Math.sqrt(this.state.height));
     }
 
     _transitionTo(position, callback) {
@@ -96,10 +108,10 @@ export default class Animator extends Component {
 }
 
 const styles = {
-    animationContainer: (height, color) => ({
-        width: SCREEN_WIDTH,
+    animationContainer: (height, color, stateHeight, stateWidth) => ({
+        width: stateWidth,
         position: 'absolute',
-        height: height + Math.sqrt(SCREEN_HEIGHT),
+        height: height + Math.sqrt(stateHeight),
         backgroundColor: color
     }),
     roundedEdges: (rounded) => {
