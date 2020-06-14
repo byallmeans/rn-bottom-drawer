@@ -92,7 +92,22 @@ export default class BottomDrawer extends Component {
         this.UP_POSITION = this._calculateUpPosition(SCREEN_HEIGHT, this.props.containerHeight, this.props.offset);
         this.DOWN_POSITION = this._calculateDownPosition(this.UP_POSITION, this.DOWN_DISPLAY);
 
-        this.state = { currentPosition: this.props.startUp ? this.UP_POSITION : this.DOWN_POSITION, currentState: this.props.startUp ? UP_STATE : DOWN_STATE };
+        this.state = {
+            currentPosition: this.props.startUp ? this.UP_POSITION : this.DOWN_POSITION,
+            currentState: this.props.startUp ? UP_STATE : DOWN_STATE,
+            downPosition: this.DOWN_POSITION,
+            upPosition: this.UP_POSITION
+        };
+    }
+
+    UNSAFE_componentWillReceiveProps(nextProps) {
+        if (nextProps.offset !== this.props.offset) {
+            const newDisplay = nextProps.downDisplay || nextProps.containerHeight / 1.5;
+
+            const newUp = this._calculateUpPosition(SCREEN_HEIGHT, nextProps.containerHeight, nextProps.offset);
+            const newDown = this._calculateDownPosition(this.UP_POSITION, newDisplay);
+            this.setState({ upPosition: newUp, downPosition: newDown });
+        }
     }
 
     setDrawerState(state) {
@@ -125,8 +140,8 @@ export default class BottomDrawer extends Component {
                 currentPosition={this.state.currentPosition}
                 setCurrentPosition={(position) => this.setCurrentPosition(position)}
                 toggleThreshold={this.TOGGLE_THRESHOLD}
-                upPosition={this.UP_POSITION}
-                downPosition={this.DOWN_POSITION}
+                upPosition={this.state.upPosition}
+                downPosition={this.state.downPosition}
                 roundedEdges={this.props.roundedEdges}
                 shadow={this.props.shadow}
                 containerHeight={this.props.containerHeight}

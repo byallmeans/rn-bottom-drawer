@@ -19,12 +19,16 @@ export default class Animator extends Component {
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
-        if (nextProps.drawerState !== this.props.drawerState) {
+        if (
+            nextProps.drawerState !== this.props.drawerState ||
+            nextProps.downPosition !== this.props.downPosition ||
+            nextProps.upPosition !== this.props.upPosition
+        ) {
             if (nextProps.drawerState === 0) {
-                this._transitionTo(this.props.downPosition, this.props.onCollapsed);
+                this._transitionTo(nextProps.downPosition, this.props.onCollapsed);
             }
             if (nextProps.drawerState === 1) {
-                this._transitionTo(this.props.upPosition, this.props.onExpanded);
+                this._transitionTo(nextProps.upPosition, this.props.onExpanded);
             }
         }
     }
