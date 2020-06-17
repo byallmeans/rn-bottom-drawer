@@ -30,17 +30,17 @@ export default class Animator extends Component {
         });
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
+    componentDidUpdate(prevProps) {
         if (
-            nextProps.drawerState !== this.props.drawerState ||
-            nextProps.downPosition !== this.props.downPosition ||
-            nextProps.upPosition !== this.props.upPosition
+            prevProps.drawerState !== this.props.drawerState ||
+            prevProps.downPosition !== this.props.downPosition ||
+            prevProps.upPosition !== this.props.upPosition
         ) {
-            if (nextProps.drawerState === 0) {
-                this._transitionTo(nextProps.downPosition, this.props.onCollapsed);
+            if (this.props.drawerState === 0) {
+                this._transitionTo(this.props.downPosition, this.props.onCollapsed);
             }
-            if (nextProps.drawerState === 1) {
-                this._transitionTo(nextProps.upPosition, this.props.onExpanded);
+            if (this.props.drawerState === 1) {
+                this._transitionTo(this.props.upPosition, this.props.onExpanded);
             }
         }
     }

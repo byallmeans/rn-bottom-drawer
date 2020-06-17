@@ -111,11 +111,11 @@ export default class BottomDrawer extends Component {
         });
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        if (nextProps.offset !== this.props.offset) {
-            const newDisplay = nextProps.downDisplay || nextProps.containerHeight / 1.5;
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.offset !== this.props.offset) {
+            const newDisplay = this.props.downDisplay || this.props.containerHeight / 1.5;
 
-            const newUp = this._calculateUpPosition(this.state.height, nextProps.containerHeight, nextProps.offset);
+            const newUp = this._calculateUpPosition(this.state.height, this.props.containerHeight, this.props.offset);
             const newDown = this._calculateDownPosition(this.UP_POSITION, newDisplay);
             this.setState({ upPosition: newUp, downPosition: newDown, width: Dimensions.get('window').width, height: Dimensions.get('window').height });
         }
