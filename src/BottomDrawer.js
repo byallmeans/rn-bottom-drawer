@@ -1,140 +1,178 @@
 import React, { Component } from 'react';
-import { PanResponder, Animated, Dimensions, StyleSheet } from 'react-native';
-import { DOWN_STATE, UP_STATE } from './BottomDrawer';
+import PropTypes from 'prop-types';
+import { View, Dimensions, Animated } from 'react-native';
 
-export default class Animator extends Component {
-    state = {
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height
+import Animator from './Animator';
+
+export const DOWN_STATE = 0;
+export const UP_STATE = 1;
+
+export default class BottomDrawer extends Component {
+    static propTypes = {
+        /**
+         * Height of the drawer.
+         */
+        containerHeight: PropTypes.number.isRequired,
+
+        /**
+         * The amount of offset to apply to the drawer's position.
+         * If the app uses a header and tab navigation, offset should equal
+         * the sum of those two components' heights.
+         */
+        offset: PropTypes.number,
+
+        /**
+         * Set to true to have the drawer start in up position.
+         */
+        startUp: PropTypes.bool,
+
+        /**
+         * How much the drawer's down display falls beneath the up display.
+         * Ex: if set to 20, the down display will be 20 points underneath the up display.
+         */
+        downDisplay: PropTypes.number,
+
+        /**
+         * The background color of the drawer.
+         */
+        backgroundColor: PropTypes.string,
+
+        /**
+         * Set to true to give the top of the drawer rounded edges.
+         */
+        roundedEdges: PropTypes.bool,
+
+        /**
+         * Set to true to give the drawer a shadow.
+         */
+        shadow: PropTypes.bool,
+
+        /**
+         * A callback function triggered when the drawer swiped into up position
+         */
+        onExpanded: PropTypes.func,
+
+        /**
+         * A callback function triggered when the drawer swiped into down position
+         */
+        onCollapsed: PropTypes.func,
+
+        /*
+         * An state for changing and toggling drawer
+         */
+        drawerState: PropTypes.number
+    };
+
+    static defaultProps = {
+        offset: 0,
+        startUp: true,
+        backgroundColor: '#ffffff',
+        roundedEdges: true,
+        shadow: true,
+        onExpanded: () => {},
+        onCollapsed: () => {},
+        drawerState: DOWN_STATE
     };
 
     constructor(props) {
         super(props);
 
-        this.position = new Animated.ValueXY(this.props.currentPosition);
+        /**
+         * TOGGLE_THRESHOLD is how much the user has to swipe the drawer
+         * before its position changes between up / down.
+         */
+        this.TOGGLE_THRESHOLD = this.props.containerHeight / 11;
+        this.DOWN_DISPLAY = this.props.downDisplay || this.props.containerHeight / 1.5;
 
-        this._panResponder = PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onPanResponderMove: this._handlePanResponderMove,
-            onPanResponderRelease: this._handlePanResponderRelease
+        /**
+         * UP_POSITION and DOWN_POSITION calculate the two (x,y) values for when
+         * the drawer is swiped into up position and down position.
+         */
+        this.UP_POSITION = this._calculateUpPosition(Dimensions.get('window').height, this.props.containerHeight, this.props.offset);
+        this.DOWN_POSITION = this._calculateDownPosition(this.UP_POSITION, this.DOWN_DISPLAY);
+
+        this.state = {
+            height: Dimensions.get('window').height,
+            width: Dimensions.get('window').width,
+            currentPosition: this.props.startUp ? this.UP_POSITION : this.DOWN_POSITION,
+            currentState: this.props.startUp ? UP_STATE : DOWN_STATE,
+            downPosition: this.DOWN_POSITION,
+            upPosition: this.UP_POSITION
+        };
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.offset !== this.props.offset) {
+            const newDisplay = this.props.downDisplay || this.props.containerHeight / 1.5;
+
+            const newUp = this._calculateUpPosition(this.state.height, this.props.containerHeight, this.props.offset);
+            const newDown = this._calculateDownPosition(this.UP_POSITION, newDisplay);
+            this.setState({ upPosition: newUp, downPosition: newDown, width: Dimensions.get('window').width, height: Dimensions.get('window').height });
+        }
+    }
+
+    setDrawerState(state) {
+        this.setState({
+            currentState: state
         });
     }
 
-    componentDidMount() {
-        // Event Listener for orientation changes
-        Dimensions.addEventListener('change', this._dimmensionsHandler);
+    toggleDrawerState() {
+        this.setState({
+            currentState: this.state.currentState === UP_STATE ? DOWN_STATE : UP_STATE
+        });
     }
 
-    componentWillUnmount() {
-        Dimensions.removeEventListener('change', this._dimmensionsHandler);
+    openBottomDrawer() {
+        this.setState({
+            currentState: UP_STATE
+        });
     }
 
-    componentDidUpdate(prevProps) {
-        if (
-            prevProps.drawerState !== this.props.drawerState ||
-            prevProps.downPosition !== this.props.downPosition ||
-            prevProps.upPosition !== this.props.upPosition
-        ) {
-            if (this.props.drawerState === 0) {
-                this._transitionTo(this.props.downPosition, this.props.onCollapsed);
-            }
-            if (this.props.drawerState === 1) {
-                this._transitionTo(this.props.upPosition, this.props.onExpanded);
-            }
-        }
+    closeBottomDrawer() {
+        this.setState({
+            currentState: DOWN_STATE
+        });
     }
 
     render() {
         return (
-            <Animated.View
-                style={[
-                    { ...this.position.getLayout(), left: 0 },
-                    StyleSheet.flatten([
-                        styles.animationContainer(this.props.containerHeight, this.props.backgroundColor, this.state.height, this.state.width),
-                        styles.roundedEdges(this.props.roundedEdges),
-                        styles.shadow(this.props.shadow)
-                    ])
-                ]}
-                {...this._panResponder.panHandlers}>
+            <Animator
+                currentPosition={this.state.currentPosition}
+                setCurrentPosition={(position) => this.setCurrentPosition(position)}
+                toggleThreshold={this.TOGGLE_THRESHOLD}
+                upPosition={this.state.upPosition}
+                downPosition={this.state.downPosition}
+                roundedEdges={this.props.roundedEdges}
+                shadow={this.props.shadow}
+                containerHeight={this.props.containerHeight}
+                backgroundColor={this.props.backgroundColor}
+                onExpanded={() => this.props.onExpanded()}
+                onCollapsed={() => this.props.onCollapsed()}
+                drawerState={this.state.currentState}
+                onDrawerStateSet={(state) => this.setDrawerState(state)}>
                 {this.props.children}
-            </Animated.View>
+
+                <View style={{ height: Math.sqrt(this.state.height), backgroundColor: this.props.backgroundColor }} />
+            </Animator>
         );
     }
 
-    _dimmensionsHandler = () => {
-        this.setState({
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height
-        });
-    };
-
-    _handlePanResponderMove = (e, gesture) => {
-        if (this._swipeInBounds(gesture)) {
-            this.position.setValue({ y: this.props.currentPosition.y + gesture.dy });
-        } else {
-            this.position.setValue({ y: this.props.upPosition.y - this._calculateEase(gesture) });
-        }
-    };
-
-    _handlePanResponderRelease = (e, gesture) => {
-        if (gesture.dy > this.props.toggleThreshold && this.props.currentPosition === this.props.upPosition) {
-            this._transitionTo(this.props.downPosition, this.props.onCollapsed);
-            this.props.onDrawerStateSet(DOWN_STATE);
-        } else if (gesture.dy < -this.props.toggleThreshold && this.props.currentPosition === this.props.downPosition) {
-            this._transitionTo(this.props.upPosition, this.props.onExpanded);
-            this.props.onDrawerStateSet(UP_STATE);
-        } else {
-            this._resetPosition();
-        }
-    };
-
-    // returns true if the swipe is within the height of the drawer.
-    _swipeInBounds(gesture) {
-        return this.props.currentPosition.y + gesture.dy > this.props.upPosition.y;
+    setCurrentPosition(position) {
+        this.setState({ currentPosition: position });
     }
 
-    _calculateEase(gesture) {
-        return Math.min(Math.sqrt(gesture.dy * -1), Math.sqrt(this.state.height));
+    _calculateUpPosition(screenHeight, containerHeight, offset) {
+        return {
+            x: 0,
+            y: screenHeight - (containerHeight + offset)
+        };
     }
 
-    _transitionTo(position, callback) {
-        Animated.spring(this.position, {
-            toValue: position
-        }).start();
-
-        this.props.setCurrentPosition(position);
-        callback();
-    }
-
-    _resetPosition() {
-        Animated.spring(this.position, {
-            toValue: this.props.currentPosition
-        }).start();
+    _calculateDownPosition(upPosition, downDisplay) {
+        return {
+            x: 0,
+            y: upPosition.y + downDisplay
+        };
     }
 }
-
-const styles = {
-    animationContainer: (height, color, stateHeight, stateWidth) => ({
-        width: stateWidth,
-        position: 'absolute',
-        height: height + Math.sqrt(stateHeight),
-        backgroundColor: color
-    }),
-    roundedEdges: (rounded) => {
-        return (
-            rounded == true && {
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10
-            }
-        );
-    },
-    shadow: (shadow) => {
-        return (
-            shadow == true && {
-                shadowColor: '#CECDCD',
-                shadowRadius: 3,
-                shadowOpacity: 5
-            }
-        );
-    }
-};

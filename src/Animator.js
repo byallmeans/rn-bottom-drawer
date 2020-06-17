@@ -20,16 +20,6 @@ export default class Animator extends Component {
         });
     }
 
-    componentDidMount() {
-        // Event Listener for orientation changes
-        Dimensions.addEventListener('change', () => {
-            this.setState({
-                width: Dimensions.get('window').width,
-                height: Dimensions.get('window').height
-            });
-        });
-    }
-
     componentDidUpdate(prevProps) {
         if (
             prevProps.drawerState !== this.props.drawerState ||
