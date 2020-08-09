@@ -85,7 +85,6 @@ export default class Animator extends Component {
         if (position.y === 0) {
             Animated.timing(this.position, {
                 toValue: position,
-                duration: 300,
                 easing: Easing.inOut(Easing.ease)
             }).start();
         } else {
