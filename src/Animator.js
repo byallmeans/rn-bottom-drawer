@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanResponder, Animated, Dimensions, StyleSheet } from 'react-native';
+import { PanResponder, Animated, Dimensions, StyleSheet, Easing } from 'react-native';
 import { DOWN_STATE, UP_STATE } from './BottomDrawer';
 
 export default class Animator extends Component {
