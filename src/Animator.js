@@ -39,12 +39,14 @@ export default class Animator extends Component {
         return (
             <Animated.View
                 style={[
-                    { ...this.position.getLayout(), left: 0 },
                     StyleSheet.flatten([
                         styles.animationContainer(this.props.containerHeight, this.props.backgroundColor, this.state.height, this.state.width),
                         styles.roundedEdges(this.props.roundedEdges),
                         styles.shadow(this.props.shadow)
-                    ])
+                    ]),
+                    {
+                        transform: this.position.getTranslateTransform()
+                    }
                 ]}
                 {...this._panResponder.panHandlers}>
                 {this.props.children}
@@ -61,6 +63,10 @@ export default class Animator extends Component {
     };
 
     _handlePanResponderRelease = (e, gesture) => {
+        if (gesture.dy === 0 && this.props.currentPosition === this.props.downPosition) {
+            this.props.onPress ? this.props.onPress(e) : null;
+        }
+
         if (gesture.dy > this.props.toggleThreshold && this.props.currentPosition === this.props.upPosition) {
             this._transitionTo(this.props.downPosition, this.props.onCollapsed);
             this.props.onDrawerStateSet(DOWN_STATE);
@@ -85,11 +91,14 @@ export default class Animator extends Component {
         if (position.y === 0) {
             Animated.timing(this.position, {
                 toValue: position,
-                easing: Easing.inOut(Easing.ease)
+                duration: 250,
+                easing: Easing.inOut(Easing.ease),
+                useNativeDriver: true
             }).start();
         } else {
             Animated.spring(this.position, {
-                toValue: position
+                toValue: position,
+                useNativeDriver: true
             }).start();
         }
 
@@ -99,7 +108,8 @@ export default class Animator extends Component {
 
     _resetPosition() {
         Animated.spring(this.position, {
-            toValue: this.props.currentPosition
+            toValue: this.props.currentPosition,
+            useNativeDriver: true
         }).start();
     }
 }

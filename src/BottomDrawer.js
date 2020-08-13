@@ -57,6 +57,11 @@ export default class BottomDrawer extends Component {
          */
         onCollapsed: PropTypes.func,
 
+        /**
+         * A callback function triggered when the drawer is tapped in the down state
+         */
+        onPress: PropTypes.func,
+
         /*
          * An state for changing and toggling drawer
          */
@@ -149,6 +154,7 @@ export default class BottomDrawer extends Component {
                 backgroundColor={this.props.backgroundColor}
                 onExpanded={() => this.props.onExpanded()}
                 onCollapsed={() => this.props.onCollapsed()}
+                onPress={() => this.props.onPress()}
                 drawerState={this.state.currentState}
                 onDrawerStateSet={(state) => this.setDrawerState(state)}>
                 {this.props.children}
