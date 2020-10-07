@@ -5,7 +5,7 @@ import { DOWN_STATE, UP_STATE } from './BottomDrawer';
 export default class Animator extends Component {
     state = {
         width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height
+        height: Dimensions.get('window').height,
     };
 
     constructor(props) {
@@ -16,7 +16,7 @@ export default class Animator extends Component {
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onPanResponderMove: this._handlePanResponderMove,
-            onPanResponderRelease: this._handlePanResponderRelease
+            onPanResponderRelease: this._handlePanResponderRelease,
         });
     }
 
@@ -42,11 +42,11 @@ export default class Animator extends Component {
                     StyleSheet.flatten([
                         styles.animationContainer(this.props.containerHeight, this.props.backgroundColor, this.state.height, this.state.width),
                         styles.roundedEdges(this.props.roundedEdges),
-                        styles.shadow(this.props.shadow)
+                        styles.shadow(this.props.shadow),
                     ]),
                     {
-                        transform: this.position.getTranslateTransform()
-                    }
+                        transform: this.position.getTranslateTransform(),
+                    },
                 ]}
                 {...this._panResponder.panHandlers}>
                 {this.props.children}
@@ -56,9 +56,9 @@ export default class Animator extends Component {
 
     _handlePanResponderMove = (e, gesture) => {
         if (this._swipeInBounds(gesture)) {
-            this.position.setValue({ y: this.props.currentPosition.y + gesture.dy });
+            this.position.setValue({ y: this.props.currentPosition.y + gesture.dy, x: 0 });
         } else {
-            this.position.setValue({ y: this.props.upPosition.y - this._calculateEase(gesture) });
+            this.position.setValue({ y: this.props.upPosition.y - this._calculateEase(gesture), x: 0 });
         }
     };
 
@@ -93,12 +93,12 @@ export default class Animator extends Component {
                 toValue: position,
                 duration: 250,
                 easing: Easing.inOut(Easing.ease),
-                useNativeDriver: true
+                useNativeDriver: true,
             }).start();
         } else {
             Animated.spring(this.position, {
                 toValue: position,
-                useNativeDriver: true
+                useNativeDriver: true,
             }).start();
         }
 
@@ -109,7 +109,7 @@ export default class Animator extends Component {
     _resetPosition() {
         Animated.spring(this.position, {
             toValue: this.props.currentPosition,
-            useNativeDriver: true
+            useNativeDriver: true,
         }).start();
     }
 }
@@ -119,13 +119,13 @@ const styles = {
         width: stateWidth,
         position: 'absolute',
         height: height + Math.sqrt(stateHeight),
-        backgroundColor: color
+        backgroundColor: color,
     }),
     roundedEdges: (rounded) => {
         return (
             rounded == true && {
                 borderTopLeftRadius: 10,
-                borderTopRightRadius: 10
+                borderTopRightRadius: 10,
             }
         );
     },
@@ -134,8 +134,8 @@ const styles = {
             shadow == true && {
                 shadowColor: '#CECDCD',
                 shadowRadius: 3,
-                shadowOpacity: 5
+                shadowOpacity: 5,
             }
         );
-    }
+    },
 };
