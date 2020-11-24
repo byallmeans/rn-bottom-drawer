@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { PanResponder, Animated, Dimensions, StyleSheet, Easing } from 'react-native';
 import { DOWN_STATE, UP_STATE } from './BottomDrawer';
 
+let isTransitioning = false;
+
 export default class Animator extends Component {
     state = {
         width: Dimensions.get('window').width,
@@ -26,10 +28,10 @@ export default class Animator extends Component {
             prevProps.downPosition !== this.props.downPosition ||
             prevProps.upPosition !== this.props.upPosition
         ) {
-            if (this.props.drawerState === 0) {
+            if (this.props.drawerState === 0 && prevProps.currentPosition !== this.props.downPosition) {
                 this._transitionTo(this.props.downPosition, this.props.onCollapsed);
             }
-            if (this.props.drawerState === 1) {
+            if (this.props.drawerState === 1 && prevProps.currentPosition !== this.props.upPosition) {
                 this._transitionTo(this.props.upPosition, this.props.onExpanded);
             }
         }
